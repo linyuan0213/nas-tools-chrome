@@ -1,0 +1,30 @@
+curl -X POST http://127.0.0.1:8000/tabs/ \
+     -H "Content-Type: application/json" \
+     -d '{"url": "https://pterclub.com/index.php", "tab_name": "pter_tab", "cookie": "PHPSESSID=lkmb2ovks6126e4irlsfe1i0ve; c_secure_uid=MjMwNTg%3D; c_secure_pass=3fe4bbcb3ebc761bf29cb105e7f6de28; c_secure_ssl=eWVhaA%3D%3D; c_secure_tracker_ssl=eWVhaA%3D%3D; c_secure_login=bm9wZQ%3D%3D; c_lang_folder=chs; cf_clearance=5zd5Yh2647LMFTzciTGeLT7916_dO984UJGqb6dakyI-1733643786-1.2.1.1-dyz5jJoESqbxxL9sc_b4usA7thdYPOmfYv6FhRV9aNo4qIbSRPhgKbTCNbDx.hsVQoBqcjdmYcngxMXMyPjJh_5EGiNG5yrMQMqfTSQtwWIh2KG2AJKaaxCYw93Dq6T_GLuIcHDE2ISFD1N1RjF9qKlaPL38VzHqOp3kvhrJWDNYHbSYbWALirW9HjE8KaWZHo8TWZyx28AhA_XjyKtqv0WzP550lbk89MSJyCIriSJkznoGMxie.T5ukWmjtv4824YAIfZ.wwqOIT1yFohpqOez.4oKDXDyfTYQ7rLo..BCRbyKgUXbmZSHm4y960uYnrmbH_l7tYC3IacJmsAs9SsmR.UsOD30oC6EuwXuoH7mhzvHWQsaNKUSqnfQR2jyEFs7uzTT_5Q.nDy2Lbgjcj7ICHoIYdwM5eCWI7oHpvdRUZG9zAuwtBNwEoHYCBb6"}'
+
+curl -X POST http://127.0.0.1:8000/tabs/click/ \
+     -H "Content-Type: application/json" \
+     -d '{"tab_name": "pter_tab", "selector": "xpath://a[@class=\"User_Name\"]"}'
+
+curl http://127.0.0.1:8000/tabs/pter_tab/html
+
+curl -X DELETE http://127.0.0.1:8000/tabs/pter_tab
+
+curl -X POST http://127.0.0.1:8000/tabs/ \
+     -H "Content-Type: application/json" \
+     -d '{"url": "https://piggo.me/", "tab_name": "piggo_tab", "cookie": ""}'
+
+curl -X POST http://127.0.0.1:8000/tabs/ \
+     -H "Content-Type: application/json" \
+     -d '{"url": "https://pterclub.com/index.php", "tab_name": "pter_tab", "cookie": ""}'
+
+curl -X POST http://127.0.0.1:8000/tabs/ \
+     -H "Content-Type: application/json" \
+     -d '{"url": "www.yemapt.org", "tab_name": "yema_tab", "cookie": "auth=MTYwYTJjODhmMmNlYjAyZWM0MDFmMWU5MjdjZmY2OTUJMTczMzYyNjA5MzY3MQkxNzM2MjE4MDkzNjcxCTkyOAlsb2dpbg==;"}'
+
+curl -X POST http://127.0.0.1:8000/tabs/click/ \
+     -H "Content-Type: application/json" \
+     -d '{"tab_name": "yema_tab", "selector": "xpath://span[@class=\"ant-statistic-content-suffix\"]"}'
+
+x11vnc -storepasswd
+x11vnc -display :99 -rfbauth /root/.vnc/passwd -forever -shared -timeout 0
