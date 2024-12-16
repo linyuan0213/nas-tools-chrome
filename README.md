@@ -11,8 +11,9 @@
     ```
 
   - 通过 docker 部署
+    默认的shm太小，必须要配置 shm-size
 
     ```
-    docker run -p 9850:9850 -d linyuan213/nas-tools-chrome:latest
+    docker run --shm-size=2g -p 9850:9850 -d linyuan213/nas-tools-chrome:latest
     ```
 
