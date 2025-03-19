@@ -62,9 +62,12 @@ CHALLENGE_SELECTORS = [
     # Custom CloudFlare for EbookParadijs, Film-Paleis, MuziekFabriek and Puur-Hollands
     'td.info #js_info',
     # Fairlane / pararius.com
-    'div.vc div.text-box h2'
+    'div.vc div.text-box h2',
+    # 雷池
+    'span#slg-name'
 ]
 
 CHALLENGE_BOX_SELECTORS = [
-    'input[name="cf-turnstile-response"]'
+    'input[name="cf-turnstile-response"]',
+    'span#slg-name'
 ]

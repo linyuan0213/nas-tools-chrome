@@ -1,3 +1,4 @@
+import time
 from typing import Tuple
 from loguru import logger
 from DrissionPage.items import MixTab
@@ -45,11 +46,12 @@ def sync_cf_retry(page: MixTab, tries: int = 5) -> Tuple[bool, bool]:
     user_tries = tries
     while tries > 0:
         # 非CF网站
+        time.sleep(2)
         if not under_challenge(page.html):
             success = True
             break
         try:
-            page.wait(5)
+            time.sleep(5)
             if not under_challenge(page.html):
                 success = True
                 break
@@ -80,7 +82,7 @@ def sync_cf_box_retry(page: MixTab, tries: int = 3) -> Tuple[bool, bool]:
             success = True
             break
         try:
-            page.wait(5)
+            time.sleep(5)
             if not under_box_challenge(page.html):
                 success = True
                 break
@@ -99,7 +101,7 @@ def sync_cf_box_retry(page: MixTab, tries: int = 3) -> Tuple[bool, bool]:
                 success=True
                 break
         except Exception as e:
-            page.wait(1)
+            time.sleep(5)
             logger.debug(f"DrissionPage Error: {e}")
             success = False
         tries -= 1
