@@ -1,0 +1,15 @@
+[project]
+name = "nas-tools-chrome"
+version = "2.0.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "drissionpage>=4.1.1.2",
+    "fake-useragent>=2.2.0",
+    "fastapi>=0.122.0",
+    "loguru>=0.7.3",
+    "pydantic>=2.12.5",
+    "pyquery>=2.0.1",
+    "uvicorn>=0.38.0",
+]
