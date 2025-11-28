@@ -10,7 +10,7 @@ from DrissionPage.items import MixTab
 from fake_useragent import UserAgent
 from loguru import logger
 
-from src.config.settings import JS_SCRIPT, BROWSER_MONITOR_INTERVAL, CHROME_PATH
+from src.config.settings import JS_SCRIPT, BROWSER_MONITOR_INTERVAL, CHROME_PATH, USER_DATA_PATH
 
 
 class BrowserManager:
@@ -25,26 +25,43 @@ class BrowserManager:
 
     def _create_chromium_options(self) -> ChromiumOptions:
         """配置Chromium浏览器选项"""
-        ua = UserAgent(browsers=['Edge', 'Chrome'], os=['Windows', 'Mac OS X', 'Linux'])
+        ua = UserAgent(browsers=['Edge', 'Chrome'], os=['Linux'])
         co = ChromiumOptions()
-        co.set_argument('--disable-webgl')
+        
+        # 基础配置
+        # co.set_argument('--disable-webgl')
         co.set_argument('--disable-gpu')
         co.set_argument('--lang=zh-CN')
         # 移除headless模式，以便noVNC可以显示
         co.set_argument('--no-headless')
         
+        # 新增Chrome参数
+        co.set_argument('-no-first-run')
+        co.set_argument('-force-color-profile=srgb')
+        co.set_argument('-metrics-recording-only')
+        co.set_argument('-password-store=basic')
+        co.set_argument('-use-mock-keychain')
+        co.set_argument('-export-tagged-pdf')
+        co.set_argument('-no-default-browser-check')
+        co.set_argument('-disable-background-mode')
+        co.set_argument('-enable-features=NetworkService,NetworkServiceInProcess,LoadCryptoTokenExtension,PermuteTLSExtensions')
+        co.set_argument('-disable-features=FlashDeprecationWarning,EnablePasswordsAccountStorage')
+        co.set_argument('-deny-permission-prompts')
+        co.set_argument('-accept-lang=zh-CN')
+        
         # Linux系统特定配置
         if platform.system() == "Linux":
             co.set_argument('--no-sandbox')
             co.set_argument('--disable-dev-shm-usage')
-            co.set_argument('--remote-debugging-port=9222')
+
+        co.set_user_data_path(USER_DATA_PATH)
 
         # 设置自定义浏览器路径（如果提供）
         if CHROME_PATH:
             co.set_browser_path(CHROME_PATH)
         
         # 设置随机User-Agent
-        co.set_user_agent(ua.random)
+        # co.set_user_agent(ua.random)
         return co
 
     async def monitor_browser(self):
