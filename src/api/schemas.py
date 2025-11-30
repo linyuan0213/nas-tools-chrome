@@ -1,4 +1,5 @@
 """API request and response schemas."""
+from typing import Dict, Optional
 from pydantic import BaseModel
 
 
@@ -6,7 +7,8 @@ class NewTabRequest(BaseModel):
     """Request schema for creating a new tab."""
     url: str
     tab_name: str
-    cookie: str
+    cookie: Optional[str] = None
+    local_storage: Optional[Dict[str, str]] = None
 
 
 class ClickRequest(BaseModel):

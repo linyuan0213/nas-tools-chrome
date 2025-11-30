@@ -18,7 +18,8 @@ async def create_tab(request: NewTabRequest):
             browser_manager.create_tab, 
             request.url, 
             request.tab_name, 
-            request.cookie
+            request.cookie,
+            request.local_storage
         )
         return result
     except ValueError as e:

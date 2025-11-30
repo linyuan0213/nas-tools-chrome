@@ -3,7 +3,7 @@ import asyncio
 import os
 import platform
 from contextlib import asynccontextmanager
-from typing import Dict
+from typing import Dict, Optional
 
 from DrissionPage import Chromium, ChromiumOptions
 from DrissionPage.items import MixTab
@@ -93,7 +93,7 @@ class BrowserManager:
             except asyncio.CancelledError:
                 pass
 
-    def create_tab(self, url: str, tab_name: str, cookie: str) -> dict:
+    def create_tab(self, url: str, tab_name: str, cookie: Optional[str] = None, local_storage: Optional[Dict[str, str]] = None) -> dict:
         """创建新的浏览器标签页"""
         # 检查是否已有同名标签页
         if tab_name in self.tabs_pool:
@@ -106,7 +106,16 @@ class BrowserManager:
             tab = self.dp.new_tab(url)
             tab.set.load_mode.none
             tab.add_init_js(JS_SCRIPT)
-            tab.set.cookies(cookie)
+            
+            # 设置cookie（如果提供）
+            if cookie:
+                tab.set.cookies(cookie)
+            
+            # 设置local_storage（如果提供）
+            if local_storage:
+                for key, value in local_storage.items():
+                    tab.set.local_storage(key, value)
+            
             tab.get(url)
 
             # 将标签页添加到池中
