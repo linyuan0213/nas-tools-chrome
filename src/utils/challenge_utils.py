@@ -122,33 +122,68 @@ def sync_cf_box_retry(page: MixTab, tries: int = 3) -> Tuple[bool, bool]:
     user_tries = tries
     
     while tries > 0:
-        # Non-CF website
+        # 首先等待页面加载完成
+        page.wait(5)
+        
+        # 检查是否处于挑战状态
         if not under_box_challenge(page.html):
-            success = True
-            break
-            
-        try:
-            page.wait(5)
+            # 等待额外时间确保页面完全加载
+            page.wait(2)
+            # 再次检查挑战状态
             if not under_box_challenge(page.html):
                 success = True
+                cf = False
                 break
-                
-            cf_solution = page.ele('tag:input@name=cf-turnstile-response', timeout=3)
+            else:
+                logger.debug("Challenge detected after additional wait")
+        
+        try:
+            # 等待cf-turnstile-response元素可用，增加超时时间
+            cf_solution = page.ele('tag:input@name=cf-turnstile-response', timeout=10)
+            if not cf_solution:
+                logger.debug("cf-turnstile-response element not found, waiting longer...")
+                page.wait(3)
+                cf_solution = page.ele('tag:input@name=cf-turnstile-response', timeout=10)
+                if not cf_solution:
+                    logger.debug("cf-turnstile-response element still not found after additional wait")
+                    # 如果找不到元素，等待更长时间再重试
+                    page.wait(5)
+                    continue
+            
             cf_wrapper = cf_solution.parent()
-            cf_iframe = cf_wrapper.shadow_root.ele("tag:iframe", timeout=3)
+            cf_iframe = cf_wrapper.shadow_root.ele("tag:iframe", timeout=10)
 
             box = cf_iframe.ele('tag:body').shadow_root
-            try:
-                cf_button = box.ele("tag:input")
+            
+            # 等待挑战按钮可用
+            cf_button = None
+            for _ in range(5):  # 最多重试5次等待按钮
+                try:
+                    cf_button = box.ele("tag:input", timeout=3)
+                    if cf_button:
+                        break
+                    page.wait(1)
+                except Exception:
+                    page.wait(1)
+            
+            if cf_button:
                 cf_button.click()
-            except Exception as e:
-                pass
+                logger.debug("CloudFlare challenge button clicked")
+            else:
+                logger.debug("CloudFlare challenge button not found")
                 
-            visibility = box.ele('tag:div@id=success').style('visibility')
-            if visibility == 'visible':
-                success = True
-                break
-                
+            # 等待挑战完成
+            for _ in range(10):  # 最多等待10秒
+                try:
+                    visibility = box.ele('tag:div@id=success').style('visibility')
+                    if visibility == 'visible':
+                        success = True
+                        logger.debug("CloudFlare challenge completed successfully")
+                        break
+                    page.wait(1)
+                except Exception:
+                    page.wait(1)
+                    
         except Exception as e:
             page.wait(1)
             logger.debug(f"DrissionPage Error: {e}")
