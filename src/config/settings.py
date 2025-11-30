@@ -82,7 +82,7 @@ CHROME_PATH = os.getenv("CHROME_PATH", "/usr/bin/chromium-browser")
 BROWSER_MONITOR_INTERVAL = 10  # 秒
 
 # 应用版本配置
-APP_VERSION = os.getenv("APP_VERSION", "2.0.0")
+APP_VERSION = os.getenv("APP_VERSION", "2.0.2")
 
 # 用户数据路径
 USER_DATA_PATH = os.getenv("USER_DATA_PATH", "/var/lib/chromium/user_data")
