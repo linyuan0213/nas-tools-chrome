@@ -8,6 +8,8 @@ RUN mkdir -p /app/
 
 COPY . /app/
 COPY supervisord.conf /etc/supervisord.conf
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 # 安装必要的软件
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -43,4 +45,4 @@ RUN cd /app && \
 
 WORKDIR /app
 
-CMD ["supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["/start.sh"]

@@ -1,18 +1,15 @@
 #!/bin/bash
 
-# 启动脚本，确保所有服务正确启动
+# 设置默认密码
+if [ -z "$VNC_PASSWORD" ]; then
+    echo "VNC_PASSWORD environment variable not set, using default password 'password'"
+    export VNC_PASSWORD=password
+else
+    echo "Using VNC_PASSWORD from environment variable: $VNC_PASSWORD"
+fi
 
-echo "启动Xvfb虚拟显示..."
-Xvfb :99 -screen 0 1280x1024x24 -ac &
+# 替换supervisord.conf中的x11vnc密码
+sed -i "s/-passwd password/-passwd $VNC_PASSWORD/g" /etc/supervisord.conf
 
-echo "等待Xvfb启动..."
-sleep 2
-
-echo "启动x11vnc服务..."
-x11vnc -display :99 -forever -shared -nopw -listen 0.0.0.0 -rfbport 5900 &
-
-echo "启动noVNC服务..."
-websockify --web /opt/noVNC 6080 0.0.0.0:5900 &
-
-echo "启动FastAPI应用..."
-python main.py
+# 启动supervisord
+exec supervisord -c /etc/supervisord.conf
