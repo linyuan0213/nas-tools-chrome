@@ -31,23 +31,31 @@ class BrowserManager:
         # 基础配置
         # co.set_argument('--disable-webgl')
         co.set_argument('--disable-gpu')
-        co.set_argument('--lang=zh-CN')
+        co.set_argument('--lang=zh-CN.UTF-8')
         # 移除headless模式，以便noVNC可以显示
         co.set_argument('--no-headless')
         
         # 新增Chrome参数
-        co.set_argument('-no-first-run')
-        co.set_argument('-force-color-profile=srgb')
-        co.set_argument('-metrics-recording-only')
-        co.set_argument('-password-store=basic')
-        co.set_argument('-use-mock-keychain')
-        co.set_argument('-export-tagged-pdf')
-        co.set_argument('-no-default-browser-check')
-        co.set_argument('-disable-background-mode')
-        co.set_argument('-enable-features=NetworkService,NetworkServiceInProcess,LoadCryptoTokenExtension,PermuteTLSExtensions')
-        co.set_argument('-disable-features=FlashDeprecationWarning,EnablePasswordsAccountStorage')
-        co.set_argument('-deny-permission-prompts')
-        co.set_argument('-accept-lang=zh-CN')
+        co.set_argument('--no-first-run')
+        co.set_argument('--force-color-profile=srgb')
+        # 禁用指标记录和报告，减少browsermetrics文件生成
+        co.set_argument('--disable-metrics')
+        co.set_argument('--disable-metrics-reporting')
+        co.set_argument('--disable-breakpad')
+        co.set_argument('--disable-background-networking')
+        co.set_argument('--no-report-upload')
+        co.set_argument('--password-store=basic')
+        co.set_argument('--use-mock-keychain')
+        co.set_argument('--export-tagged-pdf')
+        co.set_argument('--no-default-browser-check')
+        co.set_argument('--disable-background-mode')
+        co.set_argument('--enable-features=NetworkService,NetworkServiceInProcess,LoadCryptoTokenExtension,PermuteTLSExtensions')
+        co.set_argument('--disable-features=FlashDeprecationWarning,EnablePasswordsAccountStorage,UMA')
+        co.set_argument('--deny-permission-prompts')
+        # 语言设置 - 使用完整的区域设置格式
+        co.set_argument('--accept-lang=zh-CN,zh-CN.UTF-8,zh,en-US,en')
+        co.set_argument('--force-language=zh-CN')
+        co.set_argument('--force-lang=zh-CN.UTF-8')
         
         # Linux系统特定配置
         if platform.system() == "Linux":
@@ -59,6 +67,16 @@ class BrowserManager:
         # 设置自定义浏览器路径（如果提供）
         if CHROME_PATH:
             co.set_browser_path(CHROME_PATH)
+        
+        # 设置浏览器首选项（语言相关）
+        # 使用set_pref方法设置单个首选项
+        co.set_pref('intl.accept_languages', 'zh-CN,zh,en-US,en')
+        co.set_pref('spellcheck.dictionary', 'zh-CN')
+        co.set_pref('browser.enable_spellchecking', True)
+        co.set_pref('browser.spellcheck.dictionary', 'zh-CN')
+        co.set_pref('translate.enabled', False)  # 禁用自动翻译
+        co.set_pref('intl.selected_languages', 'zh-CN')
+        co.set_pref('intl.locale.requested', 'zh-CN')
         
         # 设置随机User-Agent
         # co.set_user_agent(ua.random)
@@ -93,7 +111,7 @@ class BrowserManager:
             except asyncio.CancelledError:
                 pass
 
-    def create_tab(self, url: str, tab_name: str, cookie: Optional[str] = None, local_storage: Optional[Dict[str, str]] = None) -> dict:
+    def create_tab(self, url: str, tab_name: str, cookie: Optional[str] = None, local_storage: Optional[Dict[str, str]] = None, user_agent: Optional[str] = None) -> dict:
         """创建新的浏览器标签页"""
         # 检查是否已有同名标签页
         if tab_name in self.tabs_pool:
@@ -104,8 +122,14 @@ class BrowserManager:
         try:
             # 创建新标签页
             tab = self.dp.new_tab(url)
+            tab.wait(1)
             tab.set.load_mode.none
             tab.add_init_js(JS_SCRIPT)
+            
+            # 设置User-Agent（如果提供）
+            if user_agent:
+                tab.set.user_agent(user_agent)
+                logger.debug(f"已设置自定义User-Agent: {user_agent}")
             
             # 设置cookie（如果提供）
             if cookie:
