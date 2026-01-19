@@ -9,6 +9,7 @@ class NewTabRequest(BaseModel):
     tab_name: str
     cookie: Optional[str] = None
     local_storage: Optional[Dict[str, str]] = None
+    user_agent: Optional[str] = None
 
 
 class ClickRequest(BaseModel):

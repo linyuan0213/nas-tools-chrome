@@ -19,7 +19,8 @@ async def create_tab(request: NewTabRequest):
             request.url, 
             request.tab_name, 
             request.cookie,
-            request.local_storage
+            request.local_storage,
+            request.user_agent
         )
         return result
     except ValueError as e:
