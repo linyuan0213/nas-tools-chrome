@@ -122,8 +122,9 @@ class BrowserManager:
         try:
             # 创建新标签页
             tab = self.dp.new_tab(url)
-            tab.wait(1)
-            tab.set.load_mode.none
+            
+            # 使用none加载模式，但需要在适当时候主动停止加载
+            tab.set.load_mode.none()
             tab.add_init_js(JS_SCRIPT)
             
             # 设置User-Agent（如果提供）
@@ -140,7 +141,21 @@ class BrowserManager:
                 for key, value in local_storage.items():
                     tab.set.local_storage(key, value)
             
+            # 访问URL
             tab.get(url)
+            
+            # 等待页面基本加载完成（DOMContentLoaded）
+            try:
+                # 等待页面标题出现或body元素存在，最多等待15秒
+                tab.wait.ele_displayed('tag:body', timeout=15)
+            except Exception as load_timeout:
+                logger.warning(f"页面基本元素加载较慢: {load_timeout}")
+            
+            # 主动停止加载，防止页面无限转圈
+            tab.stop_loading()
+            
+            # 额外等待1秒确保页面稳定
+            tab.wait(1)
 
             # 将标签页添加到池中
             self.tabs_pool[tab_name] = tab
@@ -166,10 +181,30 @@ class BrowserManager:
         """从标签页获取HTML内容"""
         from src.utils.challenge_utils import sync_cf_box_retry
         
+        # 处理CloudFlare挑战
         sync_cf_box_retry(tab)
+        
+        # 确保页面加载完成
+        try:
+            # 等待页面基本稳定
+            tab.wait(1)
+            
+            # 检查页面是否还在加载
+            if tab.states.is_loading:
+                logger.debug(f"页面仍在加载，主动停止: {tab.url}")
+                tab.stop_loading()
+            
+            # 额外等待确保页面稳定
+            tab.wait(0.5)
+            
+        except Exception as e:
+            logger.warning(f"等待页面稳定时出错: {e}")
+            # 即使出错也继续获取HTML
+        
+        # 最终停止加载并获取HTML
         tab.stop_loading()
         html = tab.html
-        logger.debug(f"成功获取网站 {tab.url} 的HTML")
+        logger.debug(f"成功获取网站 {tab.url} 的HTML，长度: {len(html)} 字符")
         return html
 
     def click_element(self, tab: MixTab, selector: str):
